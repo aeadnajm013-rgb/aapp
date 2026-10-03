@@ -170,7 +170,7 @@ function login(k, silent){
   KEY = k;
   return api({ action: 'check' }).then(d => {
     if (!d.ok){ if (!silent) note('lockMsg', 'وشەی نهێنی هەڵەیە.'); store.del('qr_admin_key'); return; }
-    store.set('qr_admin_key', k);
+    store.del('qr_admin_key');
     $('lockBox').hidden = true; $('app').hidden = false;
     loadList();
   }).catch(() => note('lockMsg', 'پەیوەندی بە شیتەکەوە نەکرا. ئینتەرنێت بپشکنە.'));
@@ -178,8 +178,7 @@ function login(k, silent){
 $('unlock').onclick = () => login($('pass').value);
 $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') login($('pass').value); });
 $('logout').onclick = () => { store.del('qr_admin_key'); location.reload(); };
-const saved = store.get('qr_admin_key', '');
-if (saved) login(saved, true);
+const saved = store.get('qr_admin_key', '');store.del('qr_admin_key');
 
 // ---------- ڕێکخستن ----------
 $('base').value = store.get('qr_base', 'https://aeadnajm013-rgb.github.io/aapp/scan.html');
