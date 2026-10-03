@@ -103,6 +103,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
           <select id="size"><option value="256">256</option><option value="400" selected>400</option><option value="600">600</option><option value="1000">1000</option></select>
         </label>
       </div>
+      <label class="f">ناوی ئەم کۆمەڵەیە (ناوی ZIP)
+        <input type="text" id="batchName" placeholder="بۆ نموونە: dukan-october">
+      </label>
+      <label class="check"><input type="checkbox" id="autoZip" checked>دوای دروستکردن، یەکسەر وەک ZIP دابەزێنە</label>
       <div class="row"><button id="gen">دروستکردن</button></div>
       <div id="genMsg"></div>
     </section>
@@ -121,6 +125,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <section class="panel" id="out" hidden>
     <div class="row noprint" style="justify-content:space-between">
       <h2 id="outTitle">QR کۆدەکان</h2>
+      <select id="batchSel" aria-label="کۆمەڵە" style="width:auto;max-width:100%"><option value="">هەموو کۆمەڵەکان</option></select>
       <div class="chips" id="filter">
         <button type="button" data-f="all" aria-pressed="true">هەموو</button>
         <button type="button" data-f="free" aria-pressed="false">سکان نەکراو</button>
@@ -221,8 +226,8 @@ function save(href, filename){
 }
 
 // ---------- پیشاندان ----------
-function render(list, title){
-  if (!/^https?:\/\//.test(base())){ note('outMsg', 'سەرەتا لە "ڕێکخستن" لینکی پەڕەی سکان بنووسە، پاشان دووبارە هەوڵ بدەرەوە.'); $('out').hidden = false; $('qrs').innerHTML = ''; return; }
+function render(list, title){ return new Promise(resolve => {
+  if (!/^https?:\/\//.test(base())){ resolve(); note('outMsg', 'سەرەتا لە "ڕێکخستن" لینکی پەڕەی سکان بنووسە، پاشان دووبارە هەوڵ بدەرەوە.'); $('out').hidden = false; $('qrs').innerHTML = ''; return; }
   note('outMsg', '');
   shown = list.map(item => Object.assign({}, item));
   $('outTitle').textContent = title + ' (' + shown.length + ')';
@@ -244,16 +249,26 @@ function render(list, title){
       t.onclick = () => save(c.toDataURL('image/png'), fileBase() + '-' + n + '.png');
       box.appendChild(t);
     }
-    if (i < shown.length) setTimeout(batch, 0);
+    if (i < shown.length) setTimeout(batch, 0); else resolve();
   })();
-}
+}); }
 function applyFilter(){
   document.querySelectorAll('#filter button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
-  const list = filter === 'all' ? all : all.filter(x => filter === 'used' ? x.used : !x.used);
+  const b = $('batchSel').value;
+  let list = filter === 'all' ? all : all.filter(x => filter === 'used' ? x.used : !x.used);
+  if (b) { list = list.filter(x => (x.batch || '') === b); $('zipName').value = b; }
   render(list, filter === 'all' ? 'هەموو QR ـەکان' : filter === 'used' ? 'سکان کراوەکان' : 'سکان نەکراوەکان');
 }
 document.querySelectorAll('#filter button').forEach(b => b.onclick = () => { filter = b.dataset.f; applyFilter(); });
 $('showNo').onchange = applyFilter;
+$('batchSel').onchange = applyFilter;
+function fillBatches(){
+  const sel = $('batchSel'), cur = sel.value;
+  const names = [...new Set(all.map(x => x.batch || '').filter(Boolean))];
+  sel.innerHTML = '<option value="">هەموو کۆمەڵەکان</option>' +
+    names.map(n => '<option>' + n.replace(/[&<>"]/g, '') + '</option>').join('');
+  if (names.includes(cur)) sel.value = cur;
+}
 $('cols').onchange = () => document.documentElement.style.setProperty('--cols', $('cols').value);
 
 // ---------- لیست ----------
@@ -263,6 +278,7 @@ function loadList(){
     $('refresh').disabled = false;
     if (!d.ok) return;
     all = d.codes;
+    fillBatches();
     const used = all.filter(x => x.used).length;
     $('sAll').textContent = all.length; $('sUsed').textContent = used; $('sFree').textContent = all.length - used;
     if (all.length) applyFilter();
@@ -275,32 +291,37 @@ $('gen').onclick = () => {
   if (!/^https?:\/\//.test(base())){ note('genMsg', 'سەرەتا لینکی پەڕەی سکان بنووسە (بە https:// دەست پێ بکات).'); return; }
   const n = Math.min(1000, Math.max(1, +$('count').value || 1));
   $('gen').disabled = true; note('genMsg', n + ' کۆدی نهێنی دروست دەکرێت…', true);
-  api({ action: 'create', count: n }).then(d => {
+  const bname = ($('batchName').value || '').trim() || ('qr-' + new Date().toISOString().slice(0, 10));
+  store.set('qr_last_batch', bname);
+  api({ action: 'create', count: n, name: bname }).then(async d => {
     $('gen').disabled = false;
     if (!d.ok){ note('genMsg', 'دروست نەکرا. دووبارە هەوڵ بدەرەوە.'); return; }
     note('genMsg', d.codes.length + ' QR ی نوێ دروست کران ✅ لە خوارەوە دایانبەزێنە یان چاپیان بکە.', true);
-    render(d.codes.map(c => ({ code: c.code, no: c.no, used: false })), 'QR ـە نوێیەکان');
+    $('zipName').value = bname;
+    await render(d.codes.map(c => ({ code: c.code, no: c.no, batch: bname, used: false })), bname);
     loadListQuiet();
+    if ($('autoZip').checked) downloadZip();
   }).catch(() => { $('gen').disabled = false; note('genMsg', 'پەیوەندی نەکرا. ئینتەرنێت بپشکنە.'); });
 };
 function loadListQuiet(){
   api({ action: 'list' }).then(d => {
-    if (!d.ok) return; all = d.codes;
+    if (!d.ok) return; all = d.codes; fillBatches();
     const used = all.filter(x => x.used).length;
     $('sAll').textContent = all.length; $('sUsed').textContent = used; $('sFree').textContent = all.length - used;
   });
 }
 
 // ---------- ZIP و چاپ ----------
-$('zip').onclick = async () => {
+$('zip').onclick = () => downloadZip();
+async function downloadZip(){
   if (!shown.length) return;
   $('zip').disabled = true; note('outMsg', 'ZIP ئامادە دەکرێت…', true);
   const zip = new JSZip();
   shown.forEach(it => { if (it.canvas) zip.file(fileBase() + '-' + it.no + '.png', it.canvas.toDataURL('image/png').split(',')[1], { base64: true }); });
   const blob = await zip.generateAsync({ type: 'blob' });
   save(URL.createObjectURL(blob), fileBase() + '.zip');
-  $('zip').disabled = false; note('outMsg', 'ZIP دابەزی ✅', true);
-};
+  $('zip').disabled = false; note('outMsg', 'ZIP دابەزی ✅ (' + fileBase() + '.zip)', true);
+}
 $('pngAll').onclick = async () => {
   if (!shown.length) return;
   $('pngAll').disabled = true;
