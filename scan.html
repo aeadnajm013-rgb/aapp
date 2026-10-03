@@ -65,7 +65,7 @@ function fail(msg){
 function load(){
   if (!code) { fail('ئەم QR کۆدە دروست نییە'); return; }
   history.replaceState(null, '', location.pathname);   // کۆدەکە لە لینکی سەرەوە دەسڕێتەوە
-  fetch(API + '?action=scan&c=' + encodeURIComponent(code))
+  fetch(API + '?action=scan&code=' + encodeURIComponent(code))
     .then(r => r.json())
     .then(d => {
       if (!d.ok) {
