@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>دوو برا</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&family=Outfit:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&family=Outfit:wght@400;600;700;800&display=swap">
 <style>
 :root{
   --bg:#EEF2F4; --card:#FFFFFF; --tile:#F7FAFB; --vault:#FBF3E2; --gold-ink:#9A6B12; --line:#DCE3E7; --ink:#13232B; --muted:#5E717A;
@@ -16,10 +16,12 @@
   --bg:#0C171B; --card:#14232A; --tile:#182A31; --vault:#2A2414; --gold-ink:#E9C26B; --line:#27404A; --ink:#E6EFF2; --muted:#93A9B1;
   --brand:#0F6575; --brand-2:#0A4651; --gold:#E2B355; --ok:#5CC98A; --ok-soft:#14352A; --bad:#F28B82; --bad-soft:#3D1D1B; color-scheme:dark}}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;line-height:1.7}
+html[lang="en"] body{font-family:"Outfit","Vazirmatn",system-ui,sans-serif}
 
-/* سەرەوە: لۆگۆ و ناوی کۆمپانیا */
+/* سەرەوە */
 .hero{background:linear-gradient(160deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;
   padding:max(28px,env(safe-area-inset-top)) 16px 72px;text-align:center;position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;inset:auto -20% -60px -20%;height:120px;background:var(--bg);border-radius:50% 50% 0 0}
@@ -29,11 +31,25 @@ body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Vazirma
 @keyframes led{0%,100%{filter:drop-shadow(0 0 4px rgba(243,207,122,.55)) drop-shadow(0 0 10px rgba(243,207,122,.35))}
   50%{filter:drop-shadow(0 0 8px rgba(255,224,150,.95)) drop-shadow(0 0 22px rgba(243,207,122,.7)) drop-shadow(0 0 40px rgba(79,214,230,.35))}}
 @keyframes ring{0%,100%{stroke-opacity:.75}50%{stroke-opacity:1}}
-.name{text-shadow:0 0 18px rgba(255,255,255,.35)}
 @media (prefers-reduced-motion:reduce){.mark,.mark .ring{animation:none;filter:drop-shadow(0 0 8px rgba(243,207,122,.8))}}
-.name{font-weight:900;font-size:2rem;letter-spacing:.01em;line-height:1.1;margin:0;color:#fff}
+.name{font-family:"Vazirmatn",Tahoma,sans-serif;font-weight:900;font-size:2rem;line-height:1.1;margin:0;color:#fff;text-shadow:0 0 18px rgba(255,255,255,.35)}
 .latin{font-family:"Outfit",system-ui,sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.42em;color:var(--gold);direction:ltr;margin-inline-start:.42em}
 .tag{font-size:.85rem;opacity:.85;margin:0}
+
+/* هەڵبژاردنی زمان */
+.lang{position:absolute;top:max(14px,env(safe-area-inset-top));inset-inline-end:14px;z-index:5}
+.lang-btn{display:flex;align-items:center;gap:6px;font:inherit;font-weight:700;font-size:.8rem;color:#fff;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:6px 12px;cursor:pointer;
+  backdrop-filter:blur(6px)}
+.lang-btn svg{width:18px;height:18px}
+.lang-btn:focus-visible,.lang-menu button:focus-visible,.copy:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.lang-menu{position:absolute;top:calc(100% + 8px);inset-inline-end:0;min-width:150px;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:6px;display:grid;gap:2px}
+.lang-menu button{font:inherit;font-size:.95rem;text-align:start;background:none;border:0;color:inherit;padding:9px 12px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.lang-menu button:hover{background:var(--tile)}
+.lang-menu button[aria-checked="true"]{color:var(--brand);font-weight:800}
+.lang-menu button[aria-checked="true"]::after{content:"✓"}
+.lang-menu .en{font-family:"Outfit",system-ui,sans-serif}
 
 /* کارت */
 main{padding:0 16px 36px;margin-top:-44px;position:relative;z-index:2;display:grid;justify-items:center}
@@ -46,19 +62,18 @@ main{padding:0 16px 36px;margin-top:-44px;position:relative;z-index:2;display:gr
 .status{border-radius:10px;padding:12px 14px;font-weight:800;display:flex;gap:10px;align-items:center}
 .status.ok{background:var(--ok-soft);color:var(--ok)}
 .status.bad{background:var(--bad-soft);color:var(--bad)}
-.list{display:grid;gap:10px}
+.list{display:grid;gap:10px;margin:0}
 .item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--tile)}
 .item .ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800;font-size:.85rem}
-.item .tx{display:grid;min-width:0}
+.tx{display:grid;min-width:0}
 .item dt{font-size:.78rem;color:var(--muted)}
 .item dd{margin:0;font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}
 .vault{border:1.5px dashed var(--gold);border-radius:14px;padding:14px;display:grid;gap:10px;
   background:linear-gradient(180deg,var(--vault) 0%,transparent 100%)}
 .vault-t{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.9rem;color:var(--gold-ink)}
 .vrow{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.vrow .tx{display:grid;min-width:0}
 .vrow dt{font-size:.75rem;color:var(--muted)}
-.vrow dd{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:.04em;direction:ltr;text-align:right;overflow-wrap:anywhere;font-family:"Outfit",ui-monospace,monospace}
+.vrow dd{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:.04em;direction:ltr;text-align:start;unicode-bidi:plaintext;overflow-wrap:anywhere;font-family:"Outfit",ui-monospace,monospace}
 .copy{flex:none;font:inherit;font-size:.78rem;font-weight:700;border:1px solid var(--brand);color:var(--brand);background:transparent;border-radius:8px;padding:6px 10px;cursor:pointer}
 .copy.done{background:var(--brand);color:#fff}
 .loader{display:grid;justify-items:center;gap:12px;padding:30px 0;color:var(--muted)}
@@ -74,9 +89,23 @@ main{padding:0 16px 36px;margin-top:-44px;position:relative;z-index:2;display:gr
 <body>
 
 <header class="hero">
+  <!-- دوگمەی زمان -->
+  <div class="lang">
+    <button class="lang-btn" id="langBtn" type="button" aria-haspopup="menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 4 5.6 4 9s-1.4 6.5-4 9c-2.6-2.5-4-5.6-4-9s1.4-6.5 4-9z"/>
+      </svg>
+      <span id="langCode">KU</span>
+    </button>
+    <div class="lang-menu" id="langMenu" role="menu" hidden>
+      <button type="button" role="menuitemradio" data-lang="ku">کوردی</button>
+      <button type="button" role="menuitemradio" data-lang="ar">العربية</button>
+      <button type="button" role="menuitemradio" data-lang="en" class="en">English</button>
+    </div>
+  </div>
+
   <div class="logo">
-    <!-- لۆگۆی دوو برا: دوو کەس پاڵ بە یەکەوە لە ناو بازنەیەک -->
-    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="لۆگۆی دوو برا">
+    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="DW BRA">
       <defs>
         <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#F3CF7A"/><stop offset="1" stop-color="#C98E2C"/>
@@ -92,75 +121,133 @@ main{padding:0 16px 36px;margin-top:-44px;position:relative;z-index:2;display:gr
     </svg>
     <h1 class="name">دوو برا</h1>
     <div class="latin">DW BRA</div>
-    <p class="tag">بە متمانە و دڵسۆزییەوە</p>
+    <p class="tag" data-t="tag"></p>
   </div>
 </header>
 
 <main>
   <section class="card">
-    <div class="head"><b>زانیاری کارت</b><span aria-hidden="true"></span></div>
+    <div class="head"><b data-t="title"></b><span aria-hidden="true"></span></div>
     <div class="body" id="box">
-      <div class="loader"><div class="spin"></div>چاوەڕێ بکە…</div>
+      <div class="loader"><div class="spin"></div><span data-t="wait"></span></div>
     </div>
     <div class="foot" id="time"></div>
   </section>
-  <p class="brandfoot">© <b>دوو برا</b> — سوپاس بۆ متمانەکەت</p>
+  <p class="brandfoot">© <b>دوو برا · DW BRA</b> — <span data-t="thanks"></span></p>
 </main>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbwXT21qj1UyxWQ_Yf80Ae3iNXEgUTXepU4d0ANSO8FDhhMAd8wZ4PPz3sI2OetofLIbDA/exec';
 
+// ---------- وەرگێڕان ----------
+const T = {
+  ku: { dir:'rtl', code:'KU', title:'زانیاری کارت', tag:'بە متمانە و دڵسۆزییەوە', wait:'چاوەڕێ بکە…',
+        scanned:'سکان کرا', again:'زانیاری ئەم کارتە', vault:'زانیاری تایبەت', copy:'کۆپی', copied:'کۆپی کرا ✓',
+        invalid:'ئەم QR کۆدە دروست نییە', empty:'هیچ زانیارییەکی نوێ نەماوە', net:'پەیوەندی نەکرا. ئینتەرنێت بپشکنە.',
+        thanks:'سوپاس بۆ متمانەکەت' },
+  ar: { dir:'rtl', code:'AR', title:'معلومات البطاقة', tag:'بثقة وإخلاص', wait:'يرجى الانتظار…',
+        scanned:'تم المسح', again:'معلومات هذه البطاقة', vault:'معلومات خاصة', copy:'نسخ', copied:'تم النسخ ✓',
+        invalid:'رمز QR هذا غير صالح', empty:'لا توجد معلومات جديدة متاحة', net:'تعذّر الاتصال. تحقّق من الإنترنت.',
+        thanks:'شكراً لثقتك' },
+  en: { dir:'ltr', code:'EN', title:'Card details', tag:'With trust and sincerity', wait:'Please wait…',
+        scanned:'Scanned', again:'This card’s details', vault:'Private details', copy:'Copy', copied:'Copied ✓',
+        invalid:'This QR code is not valid', empty:'No new information is available', net:'Couldn’t connect. Check your internet.',
+        thanks:'Thank you for your trust' }
+};
+const LANGS = ['ku', 'ar', 'en'];
+const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+function defaultLang(){
+  const saved = store.get('dwbra_lang'); if (LANGS.includes(saved)) return saved;
+  const nav = (navigator.language || '').toLowerCase();
+  if (nav.startsWith('ar')) return 'ar';
+  if (nav.startsWith('en')) return 'en';
+  return 'ku';
+}
+let lang = defaultLang();
+let state = { kind: 'loading' };      // loading | ok | error
+
+// ناونیشانەکانی شیت دەتوانن بە سێ زمان بن: "کوردی | عربي | English"
+function pickHeader(h){
+  const parts = String(h || '').split('|').map(s => s.trim());
+  if (parts.length < 2) return parts[0] || '';
+  return parts[LANGS.indexOf(lang)] || parts[0];
+}
+
 const code = (new URLSearchParams(location.search).get('c') || '').trim();
 const box = document.getElementById('box');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = v => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) ? v.slice(0, 10) : v;
 
-function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function fail(msg){ box.innerHTML = '<div class="status bad">❌ ' + msg + '</div>'; }
+function render(){
+  const t = T[lang];
+  document.documentElement.lang = lang === 'ku' ? 'ckb' : lang;
+  document.documentElement.dir = t.dir;
+  document.getElementById('langCode').textContent = t.code;
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t[el.dataset.t]);
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
 
+  if (state.kind === 'loading') { box.innerHTML = '<div class="loader"><div class="spin"></div><span>' + t.wait + '</span></div>'; return; }
+  if (state.kind === 'error') { box.innerHTML = '<div class="status bad">❌ ' + t[state.msg] + '</div>'; return; }
+
+  const d = state.data;
+  const has = i => !(d.values[i] === '' || d.values[i] == null);
+  let html = '<div class="status ok">✅ ' + (d.status === 'new' ? t.scanned : t.again) + '</div>';
+  // A، B، E
+  const main = [0, 1, 4].filter(has);
+  if (main.length){
+    html += '<dl class="list">';
+    main.forEach((i, n) => {
+      const h = pickHeader(d.headers[i]);
+      html += '<div class="item"><span class="ic">' + (n + 1) + '</span><div class="tx">' +
+              (h ? '<dt>' + esc(h) + '</dt>' : '') + '<dd>' + esc(fmt(d.values[i])) + '</dd></div></div>';
+    });
+    html += '</dl>';
+  }
+  // C و D
+  const vault = [2, 3].filter(has);
+  if (vault.length){
+    html += '<div class="vault"><div class="vault-t">🔐 ' + t.vault + '</div>';
+    vault.forEach(i => {
+      const h = pickHeader(d.headers[i]);
+      html += '<div class="vrow"><div class="tx">' + (h ? '<dt>' + esc(h) + '</dt>' : '') +
+              '<dd>' + esc(fmt(d.values[i])) + '</dd></div>' +
+              '<button class="copy" type="button" data-v="' + esc(fmt(d.values[i])) + '">' + t.copy + '</button></div>';
+    });
+    html += '</div>';
+  }
+  box.innerHTML = html;
+  box.querySelectorAll('.copy').forEach(b => b.onclick = () => {
+    const done = () => { b.textContent = T[lang].copied; b.classList.add('done'); setTimeout(() => { b.textContent = T[lang].copy; b.classList.remove('done'); }, 1600); };
+    if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.v).then(done).catch(() => {});
+  });
+}
+
+// ---------- مێنیووی زمان ----------
+const langBtn = document.getElementById('langBtn'), langMenu = document.getElementById('langMenu');
+function toggleMenu(open){ langMenu.hidden = !open; langBtn.setAttribute('aria-expanded', String(open)); }
+langBtn.onclick = e => { e.stopPropagation(); toggleMenu(langMenu.hidden); };
+langMenu.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => {
+  lang = b.dataset.lang; store.set('dwbra_lang', lang); toggleMenu(false); render();
+});
+document.addEventListener('click', () => toggleMenu(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMenu(false); });
+
+// ---------- هێنانی زانیاری ----------
 function load(){
-  if (!code) { fail('ئەم QR کۆدە دروست نییە'); return; }
+  render();
+  if (!code) { state = { kind: 'error', msg: 'invalid' }; render(); return; }
   history.replaceState(null, '', location.pathname);   // کۆدەکە لە لینکی سەرەوە دەسڕێتەوە
   fetch(API + '?action=scan&code=' + encodeURIComponent(code))
     .then(r => r.json())
     .then(d => {
-      if (!d.ok) {
-        fail(d.error === 'empty' ? 'هیچ زانیارییەکی نوێ لە شیتەکەدا نەماوە' : 'ئەم QR کۆدە دروست نییە');
-        return;
+      state = d.ok ? { kind: 'ok', data: d } : { kind: 'error', msg: d.error === 'empty' ? 'empty' : 'invalid' };
+      render();
+      if (d.ok) {
+        const n = new Date();
+        document.getElementById('time').textContent = n.toLocaleDateString('en-GB') + ' — ' + n.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
       }
-      const fmt = v => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) ? v.slice(0, 10) : v;   // بەروار
-      const has = i => !(d.values[i] === '' || d.values[i] == null);
-      const label = (i, fallback) => esc(d.headers[i] || fallback);
-      let html = '<div class="status ok">✅ ' + (d.status === 'new' ? 'سکان کرا' : 'زانیاری ئەم کارتە') + '</div>';
-      // A، B، E ← زانیاری سەرەکی
-      const main = [[0, 'A'], [1, 'B'], [4, 'E']].filter(([i]) => has(i));
-      if (main.length){
-        html += '<dl class="list">';
-        main.forEach(([i, k], n) => {
-          html += '<div class="item"><span class="ic">' + (n + 1) + '</span><div class="tx">' +
-                  (d.headers[i] ? '<dt>' + esc(d.headers[i]) + '</dt>' : '') +
-                  '<dd>' + esc(fmt(d.values[i])) + '</dd></div></div>';
-        });
-        html += '</dl>';
-      }
-      // C و D ← لە ناو بۆکسێکی جیا
-      const vault = [2, 3].filter(has);
-      if (vault.length){
-        html += '<div class="vault"><div class="vault-t">🔐 زانیاری تایبەت</div>';
-        vault.forEach(i => {
-          html += '<div class="vrow"><div class="tx">' + (d.headers[i] ? '<dt>' + esc(d.headers[i]) + '</dt>' : '') +
-                  '<dd>' + esc(fmt(d.values[i])) + '</dd></div>' +
-                  '<button class="copy" type="button" data-v="' + esc(fmt(d.values[i])) + '">کۆپی</button></div>';
-        });
-        html += '</div>';
-      }
-      box.innerHTML = html;
-      box.querySelectorAll('.copy').forEach(b => b.onclick = () => {
-        const done = () => { b.textContent = 'کۆپی کرا ✓'; b.classList.add('done'); setTimeout(() => { b.textContent = 'کۆپی'; b.classList.remove('done'); }, 1600); };
-        if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.v).then(done).catch(() => {});
-      });
-      const t = new Date();
-      document.getElementById('time').textContent = t.toLocaleDateString('en-GB') + ' — ' + t.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
     })
-    .catch(() => fail('پەیوەندی نەکرا. ئینتەرنێت بپشکنە.'));
+    .catch(() => { state = { kind: 'error', msg: 'net' }; render(); });
 }
 load();
 </script>
