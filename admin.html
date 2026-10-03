@@ -17,7 +17,7 @@
   --bg:#0F1A1E; --card:#16252B; --line:#29404A; --ink:#E4EEF1; --muted:#93A9B1;
   --accent:#4FB8C7; --accent-soft:#163940; --ok:#5CC98A; --ok-soft:#14352A; --warn:#F0A94B; --warn-soft:#3A2A12; --bad:#F28B82; --bad-soft:#3D1D1B; color-scheme:dark}}
 *{box-sizing:border-box}
-  [hidden]{display:none!important}
+[hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;font-size:15px;line-height:1.7;padding:24px 16px 48px}
 .wrap{max-width:1080px;margin:0 auto;display:grid;gap:20px}
@@ -134,7 +134,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       </label>
     </div>
     <div class="row noprint">
+      <label class="f" style="flex:1;min-width:180px">ناوی فایل (بۆ ZIP و PNG)
+        <input type="text" id="zipName" placeholder="qr-codes">
+      </label>
+    </div>
+    <div class="row noprint">
       <button id="zip">دابەزاندنی ئەمانە (ZIP)</button>
+      <button class="ghost" id="pngAll">دابەزاندنی هەموو وەک PNG</button>
       <button class="ghost" id="print">چاپکردن</button>
       <span class="muted small">کلیک لە هەر QR یەک بکە بۆ دابەزاندنی تەنها ئەو.</span>
     </div>
@@ -178,7 +184,8 @@ function login(k, silent){
 $('unlock').onclick = () => login($('pass').value);
 $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') login($('pass').value); });
 $('logout').onclick = () => { store.del('qr_admin_key'); location.reload(); };
-const saved = store.get('qr_admin_key', '');store.del('qr_admin_key');
+// PIN every time
+store.del('qr_admin_key');
 
 // ---------- ڕێکخستن ----------
 $('base').value = store.get('qr_base', 'https://aeadnajm013-rgb.github.io/aapp/scan.html');
@@ -203,6 +210,10 @@ function makeQR(text, size, label){
     x.fillText(label, c.width / 2, size + pad + lh / 2);
   }
   return c;
+}
+function fileBase(){
+  const v = ($('zipName').value || '').trim().replace(/[\\/:*?"<>|]+/g, '-');
+  return v || 'qr-codes';
 }
 function save(href, filename){
   const a = document.createElement('a'); a.href = href; a.download = filename;
@@ -230,7 +241,7 @@ function render(list, title){
       t.appendChild(img);
       if (it.used){ const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'سکان کراوە'; t.appendChild(b); }
       const c = it.canvas, n = it.no;
-      t.onclick = () => save(c.toDataURL('image/png'), 'qr-' + n + '.png');
+      t.onclick = () => save(c.toDataURL('image/png'), fileBase() + '-' + n + '.png');
       box.appendChild(t);
     }
     if (i < shown.length) setTimeout(batch, 0);
@@ -285,11 +296,26 @@ $('zip').onclick = async () => {
   if (!shown.length) return;
   $('zip').disabled = true; note('outMsg', 'ZIP ئامادە دەکرێت…', true);
   const zip = new JSZip();
-  shown.forEach(it => { if (it.canvas) zip.file('qr-' + it.no + '.png', it.canvas.toDataURL('image/png').split(',')[1], { base64: true }); });
+  shown.forEach(it => { if (it.canvas) zip.file(fileBase() + '-' + it.no + '.png', it.canvas.toDataURL('image/png').split(',')[1], { base64: true }); });
   const blob = await zip.generateAsync({ type: 'blob' });
-  save(URL.createObjectURL(blob), 'qr-codes-' + shown[0].no + '-' + shown[shown.length - 1].no + '.zip');
+  save(URL.createObjectURL(blob), fileBase() + '.zip');
   $('zip').disabled = false; note('outMsg', 'ZIP دابەزی ✅', true);
 };
+$('pngAll').onclick = async () => {
+  if (!shown.length) return;
+  $('pngAll').disabled = true;
+  for (let k = 0; k < shown.length; k++){
+    const it = shown[k];
+    if (!it.canvas) continue;
+    note('outMsg', 'PNG دادەبەزێت… ' + (k + 1) + ' / ' + shown.length, true);
+    save(it.canvas.toDataURL('image/png'), fileBase() + '-' + it.no + '.png');
+    await new Promise(r => setTimeout(r, 350));
+  }
+  $('pngAll').disabled = false;
+  note('outMsg', shown.length + ' PNG دابەزین ✅ ئەگەر براوزەر پرسیاری کرد، "Allow" بکە.', true);
+};
+$('zipName').value = store.get('qr_zip_name', '');
+$('zipName').addEventListener('input', () => store.set('qr_zip_name', $('zipName').value));
 $('print').onclick = () => window.print();
 </script>
 </body>
