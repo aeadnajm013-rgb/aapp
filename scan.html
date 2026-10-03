@@ -9,11 +9,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&family=Outfit:wght@600;700&display=swap">
 <style>
 :root{
-  --bg:#EEF2F4; --card:#FFFFFF; --line:#DCE3E7; --ink:#13232B; --muted:#5E717A;
+  --bg:#EEF2F4; --card:#FFFFFF; --tile:#F7FAFB; --vault:#FBF3E2; --gold-ink:#9A6B12; --line:#DCE3E7; --ink:#13232B; --muted:#5E717A;
   --brand:#0D5C6B; --brand-2:#0A4651; --gold:#D9A441; --ok:#1F7A45; --ok-soft:#E3F3E9; --bad:#B3261E; --bad-soft:#FBE4E2;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0C171B; --card:#14232A; --line:#27404A; --ink:#E6EFF2; --muted:#93A9B1;
+  --bg:#0C171B; --card:#14232A; --tile:#182A31; --vault:#2A2414; --gold-ink:#E9C26B; --line:#27404A; --ink:#E6EFF2; --muted:#93A9B1;
   --brand:#0F6575; --brand-2:#0A4651; --gold:#E2B355; --ok:#5CC98A; --ok-soft:#14352A; --bad:#F28B82; --bad-soft:#3D1D1B; color-scheme:dark}}
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -24,8 +24,14 @@ body{min-height:100vh;background:var(--bg);color:var(--ink);font-family:"Vazirma
   padding:max(28px,env(safe-area-inset-top)) 16px 72px;text-align:center;position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;inset:auto -20% -60px -20%;height:120px;background:var(--bg);border-radius:50% 50% 0 0}
 .logo{display:grid;justify-items:center;gap:10px;position:relative;z-index:1}
-.mark{width:84px;height:84px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
-.name{font-weight:900;font-size:2rem;letter-spacing:.01em;line-height:1.1;margin:0}
+.mark{width:92px;height:92px;overflow:visible;animation:led 2.6s ease-in-out infinite}
+.mark .ring{animation:ring 2.6s ease-in-out infinite}
+@keyframes led{0%,100%{filter:drop-shadow(0 0 4px rgba(243,207,122,.55)) drop-shadow(0 0 10px rgba(243,207,122,.35))}
+  50%{filter:drop-shadow(0 0 8px rgba(255,224,150,.95)) drop-shadow(0 0 22px rgba(243,207,122,.7)) drop-shadow(0 0 40px rgba(79,214,230,.35))}}
+@keyframes ring{0%,100%{stroke-opacity:.75}50%{stroke-opacity:1}}
+.name{text-shadow:0 0 18px rgba(255,255,255,.35)}
+@media (prefers-reduced-motion:reduce){.mark,.mark .ring{animation:none;filter:drop-shadow(0 0 8px rgba(243,207,122,.8))}}
+.name{font-weight:900;font-size:2rem;letter-spacing:.01em;line-height:1.1;margin:0;color:#fff}
 .latin{font-family:"Outfit",system-ui,sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.42em;color:var(--gold);direction:ltr;margin-inline-start:.42em}
 .tag{font-size:.85rem;opacity:.85;margin:0}
 
@@ -40,11 +46,21 @@ main{padding:0 16px 36px;margin-top:-44px;position:relative;z-index:2;display:gr
 .status{border-radius:10px;padding:12px 14px;font-weight:800;display:flex;gap:10px;align-items:center}
 .status.ok{background:var(--ok-soft);color:var(--ok)}
 .status.bad{background:var(--bad-soft);color:var(--bad)}
-dl{margin:0;display:grid}
-.item{display:grid;gap:2px;padding:12px 0;border-bottom:1px solid var(--line)}
-.item:last-child{border-bottom:0}
-dt{font-size:.82rem;color:var(--muted)}
-dd{margin:0;font-size:1.12rem;font-weight:600;overflow-wrap:anywhere}
+.list{display:grid;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--tile)}
+.item .ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800;font-size:.85rem}
+.item .tx{display:grid;min-width:0}
+.item dt{font-size:.78rem;color:var(--muted)}
+.item dd{margin:0;font-size:1.1rem;font-weight:700;overflow-wrap:anywhere}
+.vault{border:1.5px dashed var(--gold);border-radius:14px;padding:14px;display:grid;gap:10px;
+  background:linear-gradient(180deg,var(--vault) 0%,transparent 100%)}
+.vault-t{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.9rem;color:var(--gold-ink)}
+.vrow{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.vrow .tx{display:grid;min-width:0}
+.vrow dt{font-size:.75rem;color:var(--muted)}
+.vrow dd{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:.04em;direction:ltr;text-align:right;overflow-wrap:anywhere;font-family:"Outfit",ui-monospace,monospace}
+.copy{flex:none;font:inherit;font-size:.78rem;font-weight:700;border:1px solid var(--brand);color:var(--brand);background:transparent;border-radius:8px;padding:6px 10px;cursor:pointer}
+.copy.done{background:var(--brand);color:#fff}
 .loader{display:grid;justify-items:center;gap:12px;padding:30px 0;color:var(--muted)}
 .spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--brand);animation:s .8s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
@@ -66,7 +82,8 @@ dd{margin:0;font-size:1.12rem;font-weight:600;overflow-wrap:anywhere}
           <stop offset="0" stop-color="#F3CF7A"/><stop offset="1" stop-color="#C98E2C"/>
         </linearGradient>
       </defs>
-      <circle cx="50" cy="50" r="47" fill="#FFFFFF" fill-opacity=".1" stroke="url(#g)" stroke-width="3"/>
+      <circle class="ring" cx="50" cy="50" r="47" fill="#FFFFFF" fill-opacity=".08" stroke="url(#g)" stroke-width="3"/>
+      <circle cx="50" cy="50" r="41" fill="none" stroke="#7FE3F0" stroke-opacity=".35" stroke-width="1" stroke-dasharray="2 5"/>
       <rect x="27" y="34" width="20" height="40" rx="10" fill="url(#g)"/>
       <circle cx="37" cy="24" r="8" fill="url(#g)"/>
       <rect x="53" y="42" width="20" height="32" rx="10" fill="#FFFFFF"/>
@@ -109,14 +126,37 @@ function load(){
         fail(d.error === 'empty' ? 'هیچ زانیارییەکی نوێ لە شیتەکەدا نەماوە' : 'ئەم QR کۆدە دروست نییە');
         return;
       }
-      let html = '<div class="status ok">✅ ' + (d.status === 'new' ? 'سکان کرا' : 'زانیاری ئەم کارتە') + '</div><dl>';
-      for (let c = 0; c < 5; c++) {
-        if (d.values[c] === '' || d.values[c] == null) continue;
-        let v = d.values[c];
-        if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) v = v.slice(0, 10);   // بەروار
-        html += '<div class="item">' + (d.headers[c] ? '<dt>' + esc(d.headers[c]) + '</dt>' : '') + '<dd>' + esc(v) + '</dd></div>';
+      const fmt = v => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) ? v.slice(0, 10) : v;   // بەروار
+      const has = i => !(d.values[i] === '' || d.values[i] == null);
+      const label = (i, fallback) => esc(d.headers[i] || fallback);
+      let html = '<div class="status ok">✅ ' + (d.status === 'new' ? 'سکان کرا' : 'زانیاری ئەم کارتە') + '</div>';
+      // A، B، E ← زانیاری سەرەکی
+      const main = [[0, 'A'], [1, 'B'], [4, 'E']].filter(([i]) => has(i));
+      if (main.length){
+        html += '<dl class="list">';
+        main.forEach(([i, k], n) => {
+          html += '<div class="item"><span class="ic">' + (n + 1) + '</span><div class="tx">' +
+                  (d.headers[i] ? '<dt>' + esc(d.headers[i]) + '</dt>' : '') +
+                  '<dd>' + esc(fmt(d.values[i])) + '</dd></div></div>';
+        });
+        html += '</dl>';
       }
-      box.innerHTML = html + '</dl>';
+      // C و D ← لە ناو بۆکسێکی جیا
+      const vault = [2, 3].filter(has);
+      if (vault.length){
+        html += '<div class="vault"><div class="vault-t">🔐 زانیاری تایبەت</div>';
+        vault.forEach(i => {
+          html += '<div class="vrow"><div class="tx">' + (d.headers[i] ? '<dt>' + esc(d.headers[i]) + '</dt>' : '') +
+                  '<dd>' + esc(fmt(d.values[i])) + '</dd></div>' +
+                  '<button class="copy" type="button" data-v="' + esc(fmt(d.values[i])) + '">کۆپی</button></div>';
+        });
+        html += '</div>';
+      }
+      box.innerHTML = html;
+      box.querySelectorAll('.copy').forEach(b => b.onclick = () => {
+        const done = () => { b.textContent = 'کۆپی کرا ✓'; b.classList.add('done'); setTimeout(() => { b.textContent = 'کۆپی'; b.classList.remove('done'); }, 1600); };
+        if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.v).then(done).catch(() => {});
+      });
       const t = new Date();
       document.getElementById('time').textContent = t.toLocaleDateString('en-GB') + ' — ' + t.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
     })
