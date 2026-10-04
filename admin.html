@@ -52,6 +52,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .tile img{width:100%;height:auto}
 .tile .badge{position:absolute;top:4px;left:4px;font-size:.68rem;font-weight:700;border-radius:99px;padding:0 7px;background:#FBEEDB;color:#A65A00}
 .lock{max-width:380px;margin:12vh auto 0}
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.folder{font:inherit;color:var(--ink);text-align:start;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;position:relative}
+.folder:hover{border-color:var(--accent)}
+.folder[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.folder .fi{width:46px;height:38px}
+.folder .fn{font-weight:800;font-size:1rem;overflow-wrap:anywhere}
+.folder .fc{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.folder .fz{position:absolute;top:10px;inset-inline-end:10px;font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:1px 6px}
+.crumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.crumb button{padding:6px 12px;font-size:.85rem}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{padding:5px 12px;font-size:.85rem}
 .chips button[aria-pressed="false"]{background:transparent;color:var(--accent)}
@@ -122,7 +132,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </section>
   </div>
 
+  <section class="panel noprint" id="folderBox">
+    <div class="row" style="justify-content:space-between"><h2>📁 فۆڵدەرەکان</h2><span class="muted small">هەر کۆمەڵەیەک وەک فایلی ZIP. کلیک بکە بۆ کردنەوەی.</span></div>
+    <div class="folders" id="folders"><p class="muted small">هێشتا هیچ فۆڵدەرێک نییە.</p></div>
+  </section>
+
   <section class="panel" id="out" hidden>
+    <div class="crumb noprint" id="crumb" hidden>
+      <button class="ghost" type="button" id="backBtn">→ هەموو فۆڵدەرەکان</button>
+      <strong id="crumbName"></strong>
+    </div>
     <div class="row noprint" style="justify-content:space-between">
       <h2 id="outTitle">QR کۆدەکان</h2>
       <select id="batchSel" aria-label="کۆمەڵە" style="width:auto;max-width:100%"><option value="">هەموو کۆمەڵەکان</option></select>
@@ -256,7 +275,10 @@ function applyFilter(){
   document.querySelectorAll('#filter button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
   const b = $('batchSel').value;
   let list = filter === 'all' ? all : all.filter(x => filter === 'used' ? x.used : !x.used);
-  if (b) { list = list.filter(x => (x.batch || '') === b); $('zipName').value = b; }
+  if (b === '__none') { list = list.filter(x => !x.batch); $('zipName').value = 'qr-codes'; }
+  else if (b) { list = list.filter(x => (x.batch || '') === b); $('zipName').value = b; }
+  $('crumb').hidden = !b; $('crumbName').textContent = b ? '📁 ' + (b === '__none' ? NONAME : b) + '.zip' : '';
+  renderFolders();
   render(list, filter === 'all' ? 'هەموو QR ـەکان' : filter === 'used' ? 'سکان کراوەکان' : 'سکان نەکراوەکان');
 }
 document.querySelectorAll('#filter button').forEach(b => b.onclick = () => { filter = b.dataset.f; applyFilter(); });
@@ -265,11 +287,46 @@ $('batchSel').onchange = applyFilter;
 function fillBatches(){
   const sel = $('batchSel'), cur = sel.value;
   const names = [...new Set(all.map(x => x.batch || '').filter(Boolean))];
+  const hasNone = all.some(x => !x.batch);
   sel.innerHTML = '<option value="">هەموو کۆمەڵەکان</option>' +
-    names.map(n => '<option>' + n.replace(/[&<>"]/g, '') + '</option>').join('');
-  if (names.includes(cur)) sel.value = cur;
+    names.map(n => '<option>' + n.replace(/[&<>"]/g, '') + '</option>').join('') +
+    (hasNone ? '<option value="__none">' + NONAME + '</option>' : '');
+  if (names.includes(cur) || (cur === '__none' && hasNone)) sel.value = cur;
+  renderFolders();
 }
 $('cols').onchange = () => document.documentElement.style.setProperty('--cols', $('cols').value);
+
+// ---------- فۆڵدەرەکان ----------
+const NONAME = 'بێ ناو';
+const folderSvg = '<svg class="fi" viewBox="0 0 46 38" aria-hidden="true"><path d="M3 7a4 4 0 0 1 4-4h10l4 5h18a4 4 0 0 1 4 4v19a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" fill="var(--accent)" opacity=".9"/><path d="M3 13h40v18a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" fill="var(--accent)"/><rect x="19" y="15" width="8" height="3" rx="1" fill="#fff" opacity=".85"/><rect x="19" y="20" width="8" height="3" rx="1" fill="#fff" opacity=".65"/><rect x="19" y="25" width="8" height="3" rx="1" fill="#fff" opacity=".45"/></svg>';
+function renderFolders(){
+  const groups = new Map();
+  all.forEach(x => { const k = x.batch || NONAME; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); });
+  const box = $('folders');
+  if (!groups.size){ box.innerHTML = '<p class="muted small">هێشتا هیچ فۆڵدەرێک نییە.</p>'; return; }
+  const cur = $('batchSel').value;
+  const keys = [...groups.keys()].sort((a, b) => (a === NONAME) - (b === NONAME));
+  box.innerHTML = keys.map(k => {
+    const g = groups.get(k), used = g.filter(x => x.used).length;
+    const safe = k.replace(/[&<>"]/g, '');
+    return '<button type="button" class="folder" data-b="' + safe + '" aria-pressed="' + ((cur || '') === (k === NONAME ? '__none' : k)) + '">' +
+      '<span class="fz">ZIP</span>' + folderSvg +
+      '<span class="fn">' + safe + '</span>' +
+      '<span class="fc">' + g.length + ' QR · ' + used + ' سکان کراو</span></button>';
+  }).join('');
+  box.querySelectorAll('.folder').forEach(f => f.onclick = () => openFolder(f.dataset.b));
+}
+function openFolder(name){
+  const val = name === NONAME ? '__none' : name;
+  if (![...$('batchSel').options].some(o => o.value === val)){
+    const o = document.createElement('option'); o.value = val; o.textContent = name; $('batchSel').appendChild(o);
+  }
+  $('batchSel').value = val;
+  filter = 'all';
+  applyFilter();
+  $('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+$('backBtn').onclick = () => { $('batchSel').value = ''; $('out').hidden = true; shown = []; renderFolders(); $('folderBox').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
 // ---------- لیست ----------
 function loadList(){
@@ -281,7 +338,7 @@ function loadList(){
     fillBatches();
     const used = all.filter(x => x.used).length;
     $('sAll').textContent = all.length; $('sUsed').textContent = used; $('sFree').textContent = all.length - used;
-    if (all.length) applyFilter();
+    if ($('batchSel').value) applyFilter(); else renderFolders();
   }).catch(() => { $('refresh').disabled = false; });
 }
 $('refresh').onclick = loadList;
@@ -299,6 +356,7 @@ $('gen').onclick = () => {
     note('genMsg', d.codes.length + ' QR ی نوێ دروست کران ✅ لە خوارەوە دایانبەزێنە یان چاپیان بکە.', true);
     $('zipName').value = bname;
     await render(d.codes.map(c => ({ code: c.code, no: c.no, batch: bname, used: false })), bname);
+    $('crumb').hidden = false; $('crumbName').textContent = '📁 ' + bname + '.zip';
     loadListQuiet();
     if ($('autoZip').checked) downloadZip();
   }).catch(() => { $('gen').disabled = false; note('genMsg', 'پەیوەندی نەکرا. ئینتەرنێت بپشکنە.'); });
